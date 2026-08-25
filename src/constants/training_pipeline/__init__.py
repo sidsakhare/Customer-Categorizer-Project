@@ -1,5 +1,5 @@
 import os
-from src.constant.s3_bucket import TRAINING_BUCKET_NAME
+from src.constants.s3_bucket import TRAINING_BUCKET_NAME
 
 
 TARGET_COLUMN = "cluster"
@@ -29,7 +29,7 @@ DATA_INGESTION_INGESTED_DIR: str = "ingested"
 DATA_INGESTION_TRAIN_TEST_SPLIT_RATIO: float = 0.2
 
 """
-Data Validation realted contant start with DATA_VALIDATION VAR NAME
+Data Validation realted constant start with DATA_VALIDATION VAR NAME
 """
 
 DATA_VALIDATION_DIR_NAME: str = "data_validation"

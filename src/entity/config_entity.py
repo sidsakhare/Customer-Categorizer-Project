@@ -2,7 +2,7 @@ import os
 
 from pymongo import MongoClient
 from src.utils.common import Manutils
-from src.constant.prediction_pipeline import PRED_SCHEMA_FILE_PATH
+from src.constants.prediction_pipeline import PRED_SCHEMA_FILE_PATH
 from src.constants import prediction_pipeline
 from src.constants.training_pipeline import *
 from pymongo import MongoClient
@@ -10,7 +10,7 @@ from pymongo import MongoClient
 from dataclasses import dataclass
 from datetime import datetime
 
-TIMESTAMP: str = datatime.now().strftime("%m_%d_%Y_%H_%M_%S")
+TIMESTAMP: str = datetime.now().strftime("%m_%d_%Y_%H_%M_%S")
 
 @dataclass
 class TrainingPipelineConfig:
@@ -19,6 +19,7 @@ class TrainingPipelineConfig:
     timestamp:str = TIMESTAMP
 
 
+training_pipeline_config: TrainingPipelineConfig = TrainingPipelineConfig()
 
 
 class DataIngestionConfig:
@@ -29,3 +30,12 @@ class DataIngestionConfig:
     testing_file_path: str = os.path.join(data_ingestion_dir,DATA_INGESTION_INGESTED_DIR,TEST_FILE_NAME)
     train_test_split_ratio: str = DATA_INGESTION_TRAIN_TEST_SPLIT_RATIO
     collection_name:str = DATA_INGESTION_COLLECTION_NAME
+
+
+class PCAconfig:
+    def __init__(self):
+        self.n_components = 2
+        self.random_state = 42
+
+    def get_pca_config(self):
+        return self.__dict__

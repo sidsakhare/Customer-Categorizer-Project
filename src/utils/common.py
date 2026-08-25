@@ -44,7 +44,7 @@ def write_yaml_file(file_path:str,content:object,replace:bool = False)-> None:
     except Exception as e:
         raise CustomeException(e,sys)   
 
-class Manutils:
+class Mainutils:
     def __init__(self) ->None:
         pass
 
@@ -128,7 +128,7 @@ class Manutils:
         except Exception as e:
             raise CustomException(e,sys) from e
     @staticmethod
-    def get_model_params(self,model:object,x_train:DataFrame,y_train:DataFrame. model_config:dict)->Dict:
+    def get_model_params(self,model:object,x_train:DataFrame,y_train:DataFrame, model_config:dict)->Dict:
         logger.info("Entered the get_model_params method of Mainutils class")
 
         try:
@@ -139,7 +139,7 @@ class Manutils:
             model_grid = GridSearchCV(
                 params = param_grid,
                 model = model,
-                cv = grid_search_config.get('cv',3)
+                cv = grid_search_config.get('cv',3),
                 verbose = grid_search_config.get('verbose',2),
                 n_jobs = -1
             )
@@ -193,7 +193,7 @@ class Manutils:
 
             return best_model,best_score
         except Exception as e:
-            raise CustomException(e,sys) as e
+            raise CustomException(e,sys) from e
 
     @staticmethod
     def load_object(file_path:str)-> object:
@@ -217,7 +217,7 @@ class Manutils:
         try:
             shutil.unpack_archive(filename,folder_name)
             logger.info("Exited the unzip_file method of MainUtils class")
-            except Exception as e:
+        except Exception as e:
             raise CustomerException(e, sys) from e
 
          
