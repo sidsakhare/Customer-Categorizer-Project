@@ -18,6 +18,10 @@ class DataIngestion:
         self.data_ingestion_config = data_ingestion_config
         self.utils = MainUtils()
 
+
+
+
+
     def split_data_as_train_test(self,dataframe: DataFrame) -> Tuple[DataFrame, DataFrame]:
         '''
          Method Name :   split_data_as_train_test
@@ -43,5 +47,69 @@ class DataIngestion:
 
         except Exception as e:
             raise CustomerData(e,sys) from e
+
+
+    def export_data_into_feature_store(self)-> DataFrame:
+        '''
+        Method name: export_data_info_feature_store
+        Description: This method exports the entire data from mongo db to pandas dataframe and saves it in feature store
+
+        output: pandas dataframe
+        on failure: raise exception and log the error
+
+        version: 1.0
+        '''
+        try:
+            logger.info(f"Exporting data from mongo db to pandas dataframe and saving it in feature store")
+            customer_data = CustomerData()
+            customer_dataframe = customer_data.export_collection_as_dataframe(collection_name = COLECTION_NAME , database_name = DATABASE_NAME)
+
+            logger.info(f"shape of dataframe {customer_dataframe.shape}")
+            feature_store_file_path = self.data_ingestion_config.feature_store_file_path
+            dir_path = os.path.dirname(feature_store_file_path)
+            os.makedirs(dir_path,exists_ok = True)
+            logger.info(f"saveing dataframe to feature store dir:{feature_store_file_path}")
+            customer_dataframe.to_csv(feature_store_file_path, index = False, header = True)
+            return customer_dataframe
+        except Exception as e:
+            raise CustomerException(e,sys) from e
+
+    
+
+    def initial_data_ingestion(self)-> DataIngestionArtifact:
+        '''
+        Method name: initial_data_ingestion
+        Description : This method initiates data ingestion component of training pipeline 
+
+        output: train set and test set are returned as the artifact of data ingestion component
+        on failure: raise exception and log the error
+
+        version: 1.0
+        '''
+
+        logger.info(f"Entered initial_data_ingestion method of DataIngestion class")
+
+
+        try:
+            dataframe = self.export_data_into_feature_store()
+            schema_config = self.utils.read_schema_config_file()
+            dataframe = dataframe.drop(columns = schema_config['drop_columns'], axis = 1)
+
+            logger.info(f"Got the data from mongodb and saved it in feature store and dropped the columns which are not required for training")
+            self.split_data_as_train_test(dataframe = dataframe)
+
+            logger.info(f"Train test split has been performed")
+            data_ingestion_artifact = DataIngestionArtifact(
+                trained_file_path = self.data_ingestion_config.training_file_path,
+                test_file_path = self.data_ingestion_config.testing_file_path
+                )
+
+            logger.info(f"Data ingestion artifact has been created: {data_ingestion_artifact}")
+            return data_ingestion_artifact
+
+        except Exception as e:
+            raise CustomException(e,sys) from e
+
+
 
 

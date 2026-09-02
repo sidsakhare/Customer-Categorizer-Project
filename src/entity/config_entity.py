@@ -31,6 +31,14 @@ class DataIngestionConfig:
     train_test_split_ratio: str = DATA_INGESTION_TRAIN_TEST_SPLIT_RATIO
     collection_name:str = DATA_INGESTION_COLLECTION_NAME
 
+@dataclass
+class DataTransformationConfig:
+    data_transformation_dir:str = os.path.join(training_pipeline_config.artifact_dir,DATA_TRANSFORMATION_DIR_NAME)
+    transformed_train_file_path:str = os.path.join(data_transformation_dir,DATA_TRANSFORMATION_TRANSFORMED_DIR, TRAIN_FILE_NAME.replace(".csv",".npz"))
+    transformed_test_file_path:str = os.path.join(data_transformation_dir,DATA_TRANSFORMATION_TRANSFORMED_DIR, TEST_FILE_NAME.replace(".csv",".npz"))
+    transformed_object_file_path:str = os.path.join(data_transformation_dir,DATA_TRANSFORMATION_TRANSFORMED_DIR, TRANSFORMED_OBJECT_FILE_NAME)
+
+
 
 class PCAconfig:
     def __init__(self):
@@ -39,3 +47,4 @@ class PCAconfig:
 
     def get_pca_config(self):
         return self.__dict__
+
