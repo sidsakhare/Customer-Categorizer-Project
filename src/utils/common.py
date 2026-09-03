@@ -33,6 +33,22 @@ def load_numpy_array(file_path: str) -> np.ndarray:
     except Exception as e:
         raise CustomeException(e,sys) from e
 
+def save_numpy_array_data(file_path: str, array: np.ndarray) -> None:
+    """
+    Save a numpy array to a file.
+
+    Args:
+        file_path (str): Path to the file where the numpy array will be saved.
+        array (np.ndarray): Numpy array to be saved.
+    """
+    try:
+        dir_path = os.path.dirname(file_path)
+        os.makedirs(dir_path,exist_ok=True)
+        with open(file_path,'wb') as file_obj:
+            np.save(file_obj,array)
+    except Exception as e:
+        raise CustomeException(e,sys) from e
+
 def write_yaml_file(file_path:str,content:object,replace:bool = False)-> None:
     try:
         if replace:
@@ -170,7 +186,7 @@ class Mainutils:
 
         try:
             with open(file_path,"wb") as file_obj:
-                picle.dump(obj,file_obj)
+                pkl.dump(obj,file_obj)
 
             logger.info("Exited the save_object method of MainUtils class")
 

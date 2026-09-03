@@ -148,8 +148,62 @@ class DataTransformation:
         preprocessed_test_set = preprocessor.fit_transform(test_set)
 
         preprocessor_obj_dir = os.path.dirname(self.data_transformation_config.transformed_object_file_path)
+        os.makedirs(preprocessor_obj_dir,exist_ok=True)
+        self.utils.save_objects(file_path=self.data_transformation_config.transformed_object_file_path,obj=preprocessor)
+        logger.info("Exited the transform_data method of DataTransformation class")
+
+        return preprocessed_train_set, preprocessed_test_set
+
+    
+    def initial_data_transformation(self):
+        '''
+        method : initial_data_transformation
+        description : This method is used to perform initial data transformation on the component of pipeline
+
+        output: data transformation object is created and returned
+        failure: raises exception if any error occurs
+
+        version : 1.0
+        '''
+        logger.info("Entered the initial_data_transformation method of DataTransformation class")
+
+        try:
+            if self.data_validation_artifact.validation_status:
+                train_set = DataTransformation.read_data(file_path = self.data_ingestion_artifact.trained_file_path)
+                test_set = DataTransformation.read_data(file_path = self.data_ingestion_artifact.test_file_path)
+
+                train_set, test_set = self.get_new_features(train_set = train_set, test_set = test_set)
+
+                logger.info("Got the processor object")
+
+                preprocessed_train_set, preprocessed_test_set = self.transform_data(train_set = train_set, test_set = test_set)
 
 
+                cluster_creater = ClusterCreaters()
+
+                labelled_train_set = cluster_creater.initialize_clustering(preprocessed_data = preprocessed_train_set)
+                labelled_test_set = cluster_creater.initialize_clustering(preprocessed_data = preprocessed_test_set)
+
+                x_train = labelled_train_set.drop(columns = [TARGET_COLUMN], axis = 1)
+                y_train = labelled_train_set[TARGET_COLUMN]
+
+                x_test = labelled_test_set.drop(columns = [TARGET_COLUMN], axis = 1)
+                y_test = labelled_test_set[TARGET_COLUMN]
+
+                test_arr = np.c_[x_test,y_test]
+                train_arr = np.c_[x_train,y_train]
+
+                self.utils.save_numpy_array_data(file_path = self.data_transformation_config.transformed_train_file_path, array = train_arr)
+                self.utils.save_numpy_array_data(file_path = self.data_transformation_config.transformed_test_file_path, array = test_arr)
+
+                return data_transformation_artifact
+
+            else:
+                raise Exception("Data Validation is not successful. Please check the data validation artifact for more details")
+
+        except Exception as e:
+            raise CustomException(e,sys) from e
+            
 
     
 
