@@ -1,0 +1,111 @@
+import json
+import sys
+from typing import Tuple, Union
+import pandas as pd
+from evidently import Report
+from evidently.presets import DataDriftPreset
+from pandas import DataFrame
+
+from src.entity.artifact_entity import DataIngestionArtifact, DataValidationArtifact
+from src.entity.config_entity import DataIngestionConfig
+
+
+from src.exception import CustomException
+from src.logging import logger
+from src.utils.common import Manutils, write_yaml_file
+
+
+class DataValidation:
+    def __init__(self,
+                data_validation_artifact: DataValidationArtifact,
+                data_validation_config: DataIngestionConfig):
+
+        self.data_validation_artifact = data_validation_artifact
+        self.data_validation_config = data_validation_config
+        self.utils = Mainutils()
+        self._schema_config = self.utils.read_schema_config_file()
+
+    def validate_schema_columns(self, dataframe: DataFrame) -> bool:
+        '''
+        method name : validate_schema_columns
+        Description : This method checks whether the columns in the dataframe match the schema defined in the schema.yaml file.
+
+        Output : True or False value will return based on the schema validation.
+        on failure : Write exception log and then raise an Exception
+
+        version: 1.0
+        '''
+        logger.info("Entered the validate_schema_columns method of DataValidation class")
+        try:
+            schema_columns = self._schema_config["columns"]
+            dataframe_columns = list(dataframe.columns)
+
+            if set(schema_columns) == set(dataframe_columns):
+                return True
+                logger.info("Schema validation successful. Columns in the dataframe match the schema.")
+            else:
+                return False
+                logger.error("Schema validation failed. Columns in the dataframe do not match the schema.")
+
+        except Exception as e:
+            raise CustomException(e, sys) from e
+
+    
+    def validate_dataset_schema_columns(self,train_set,test_set)-> Tuple[bool,bool]:
+        '''
+        method name : validate_dataset_schema_columns
+        Description : This method checks whether the columns in the train and test datasets match the schema defined in the schema.yaml file.
+
+        Output : True or False value will return based on the schema validation.
+        On Failure: Write exception log and then raise an Exception
+
+        version: 1.0
+        '''
+        logger.info("Entered the validate_dataset_schema_columns method of DataValidation class")
+        try:
+            logger.info("Validating schema columns for train dataset")
+            train_schema_status = self.validate_schema_columns(train_set)
+            logger.info("Validating schema columns for test dataset")
+            test_schema_status = self.validate_schema_columns(test_set)
+            logger.info("Schema validation completed for both train and test datasets")
+            return train_schema_status, test_schema_status
+
+        except Exception as e:
+            raise CustomException(e, sys) from e
+
+    def detect_dataset_drift(self, referance_df: DataFrame, current_df: DataFrame) -> dict:
+        '''
+        method name : detect_dataset_drift
+        Description : This method checks for data drift between the reference and current/production datasets using the Evidently library.
+
+        Output : Return bool or float values based on the data drift detection.
+        On Failure: Write exception log and then raise an Exception
+
+        version: 1.0
+        '''
+        logger.info("Entered the detect_dataset_drift method of DataValidation class")
+        try:
+            report = Report(presets=[DataDriftPreset()])
+            report.calculate(referance_df, current_df)
+            json_report = json.loads(report.json())
+
+            write_yaml_file(file_path = self.data_validation_config.drift_report_file_path, content = json_report)
+
+            n_features = json_report["metrics"][0]["result"]["number_of_columns"]
+            n_drifted_features = json_report["metrics"][0]["result"]["number_of_drifted_columns"]
+
+            logger.info(f"{n_drifted_features}/{n_features} drift detected")
+            drift_status = json_report["metrics"][0]["result"]["dataset_drift"]
+
+            return drift_status
+
+        except Exception as e:
+            raise CustomException(e, sys) from e
+
+    @staticmethod
+
+    def read_data(file_path)-> DataFrame:
+        try:
+            return pd.read_csv(file_path)
+        except Exception as e:
+            raise CustomException(e,sys) from e

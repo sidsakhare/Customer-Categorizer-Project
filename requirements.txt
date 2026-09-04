@@ -2,12 +2,11 @@ boto3==1.43.53 #AWS SDK for Python to interact with AWS services (S3, EC2, etc.)
 botocore-stubs==1.43.14 # Type hints and auto-completion support for botocore, the core of boto3.
 dill==0.4.1 #Enhanced serialization tool for Python objects, supporting more data types.
 dnspython==2.8.0 #DNS toolkit for performing DNS queries and operations.
-evidently==0.7.21 #Library for monitoring machine learning models and detecting data drift.
+evidently==0.7.21 #Library for monitoring machine learning models and detecting data drift 
 fastapi==0.139.2 #Modern, high-performance web framework for APIs, based on Python type hints.
 from-root==1.0.2 #Utility to find the root directory of a project dynamically.
 httptools==0.8.0 #High-performance HTTP parser used by async web servers like uvicorn.
-imblearn==0.0 #Library for handling imbalanced datasets (e.g., SMOTE for oversampling).
-#mypy-boto3-s3==1.43.53 #Type hints for boto3 S3 client, improving IDE autocompletion.
+imbalanced-learn==0.13.0 #Library for handling imbalanced datasets (e.g., SMOTE for oversampling). 
 pip-chill==1.0.5 #Simplifies viewing and freezing installed Python packages.
 pymongo==4.17.0 #MongoDB driver for Python, enabling interaction with MongoDB databases.
 jinja2==3.1.6 #Fast and powerful template engine used in Flask and FastAPI.
@@ -16,7 +15,6 @@ types-s3transfer==0.16.0 #Type hints for s3transfer, an Amazon S3 transfer utili
 uvicorn==0.51.0 #ASGI web server for running FastAPI and other async frameworks.
 watchfiles==1.2.0 #Monitors file changes in real time, useful for auto-reloading services.
 websockets==16.1.1 #Enables real-time, two-way communication over WebSockets in Python.
-wincertstore==0.2 #Windows-only package for handling SSL/TLS certificates.
 xgboost==3.3.0 #High-performance machine learning library optimized for gradient boosting.
 python-multipart==0.0.32 #Parses multipart/form-data requests, often used for file uploads in APIs.
-neuro_mf==0.0.5 # A neural network-based meta-feature extractor for ML models.
+neuro_mf==0.0.5 # A neural network-based meta-feature extractor for ML models. NOTE: verify this installs cleanly in isolation first — 
