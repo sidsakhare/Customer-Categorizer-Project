@@ -1,0 +1,15 @@
+# ML pipeline outputs
+src/artifact/
+logs/
+
+# Python
+__pycache__/
+*.pyc
+.customer_categorizer/
+
+# Environment secrets
+.env
+
+# OS/editor clutter
+.vscode/
+.DS_Store

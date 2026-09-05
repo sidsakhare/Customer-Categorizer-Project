@@ -1,7 +1,7 @@
 import os
 
 from pymongo import MongoClient
-from src.utils.common import Manutils
+from src.utils.common import Mainutils
 from src.constants.prediction_pipeline import PRED_SCHEMA_FILE_PATH
 from src.constants import prediction_pipeline
 from src.constants.training_pipeline import *
@@ -34,9 +34,9 @@ class DataIngestionConfig:
 @dataclass
 class DataTransformationConfig:
     data_transformation_dir:str = os.path.join(training_pipeline_config.artifact_dir,DATA_TRANSFORMATION_DIR_NAME)
-    transformed_train_file_path:str = os.path.join(data_transformation_dir,DATA_TRANSFORMATION_TRANSFORMED_DIR, TRAIN_FILE_NAME.replace(".csv",".npz"))
-    transformed_test_file_path:str = os.path.join(data_transformation_dir,DATA_TRANSFORMATION_TRANSFORMED_DIR, TEST_FILE_NAME.replace(".csv",".npz"))
-    transformed_object_file_path:str = os.path.join(data_transformation_dir,DATA_TRANSFORMATION_TRANSFORMED_DIR, TRANSFORMED_OBJECT_FILE_NAME)
+    transformed_train_file_path:str = os.path.join(data_transformation_dir,DATA_TRANSFORMATION_TRANSFORMED_DATA_DIR, TRAIN_FILE_NAME.replace(".csv",".npz"))
+    transformed_test_file_path:str = os.path.join(data_transformation_dir,DATA_TRANSFORMATION_TRANSFORMED_DATA_DIR, TEST_FILE_NAME.replace(".csv",".npz"))
+    transformed_object_file_path:str = os.path.join(data_transformation_dir,DATA_TRANSFORMATION_TRANSFORMED_DATA_DIR, PREPROCSSING_OBJECT_FILE_NAME)
 
 @dataclass
 class DataValidationConfig:

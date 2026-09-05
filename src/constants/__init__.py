@@ -1,0 +1,1 @@
+from .database import DATABASE_NAME, COLLECTION_NAME

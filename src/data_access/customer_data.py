@@ -1,5 +1,5 @@
 import sys
-from typing import optional
+from typing import Optional
 import numpy as np
 import pandas as pd
 from pandas import DataFrame
@@ -19,7 +19,7 @@ class CustomerData:
             raise CustomException(e,sys) from e
     
     def export_collection_as_dataframe(
-        self, collection_name:str, database_name:optional[str]
+        self, collection_name:str, database_name:Optional[str]
     ) -> DataFrame:
         try:
             '''
@@ -29,11 +29,11 @@ class CustomerData:
             if database_name is None:
                 collection = self.mongo_client.database[collection_name]
             else:
-                collection = self.mongo_client[database_name][collection_name]
+                collection = self.mongo_client.client[database_name][collection_name]
             df = pd.DataFrame(list(collection.find()))
             if "_id" in df.columns.to_list():
-                df.drop(columns = ["_id"], axis = 1)
-            df.replace({"na",np.nan}, inplace = True)
+                df.drop(columns = ["_id"])
+            df.replace({"na":np.nan}, inplace = True)
             return df
         except Exception as e:
             raise CustomException(e,sys) from e

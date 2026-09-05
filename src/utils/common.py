@@ -1,4 +1,3 @@
-print("script starts here")
 import shutil
 import sys
 from typing import Dict, Tuple
