@@ -28,7 +28,7 @@ class CreatClusters:
 
         try:
             logger.info("initializing PCA...")
-            reduced_dataset = PCA(**self.pca_config.__dict__).fit(preprocessed_data)
+            reduced_dataset = PCA(**self.pca_config.__dict__).fit_transform(preprocessed_data)
 
             logger.info("PCA transformation is done")
             return reduced_dataset
@@ -51,10 +51,10 @@ class CreatClusters:
 
             reduced_data = self.get_dataset_using_pca(preprocessed_data)
 
-            model = KMeans(n_clusters = 3).fit_predict(preprocessed_data)
+            model = KMeans(n_clusters = 3).fit(reduced_dataset)
 
             preprocessed_data[TARGET_COLUMN] = model.labels_.astype(int)
-            logging.info("Clustering is done")
+            logger.info("Clustering is done")
             return preprocessed_data
 
         except Exception as e:

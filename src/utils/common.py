@@ -17,6 +17,7 @@ from sklearn.model_selection import GridSearchCV
 from yaml import safe_dump
 
 from src.logging import logger
+from src.exception import CustomException
 
 def load_numpy_array(file_path: str) -> np.ndarray:
     """
@@ -30,7 +31,7 @@ def load_numpy_array(file_path: str) -> np.ndarray:
         with open(file_path,'rb') as file_obj:
             return np.load(file_obj)
     except Exception as e:
-        raise CustomeException(e,sys) from e
+        raise CustomException(e,sys) from e
 
 def save_numpy_array_data(file_path: str, array: np.ndarray) -> None:
     """
@@ -46,7 +47,7 @@ def save_numpy_array_data(file_path: str, array: np.ndarray) -> None:
         with open(file_path,'wb') as file_obj:
             np.save(file_obj,array)
     except Exception as e:
-        raise CustomeException(e,sys) from e
+        raise CustomException(e,sys) from e
 
 def write_yaml_file(file_path:str,content:object,replace:bool = False)-> None:
     try:
@@ -57,7 +58,7 @@ def write_yaml_file(file_path:str,content:object,replace:bool = False)-> None:
         with open(file_path,"w") as file:
             yaml.dump(content,file)
     except Exception as e:
-        raise CustomeException(e,sys)   
+        raise CustomException(e,sys)   
 
 class Mainutils:
     def __init__(self) ->None:
@@ -69,7 +70,7 @@ class Mainutils:
                 return yaml.safe_load(yaml_file)
 
         except Exception as e:
-            raise CustomeException(e,sys) from e
+            raise CustomException(e,sys) from e
 
     def read_schema_config_file(self) -> dict:
         try:
@@ -78,7 +79,7 @@ class Mainutils:
             return schema_config
 
         except Exception as e:
-            raise CustomeException(e,sys) from e
+            raise CustomException(e,sys) from e
 
     def read_model_config_file(self) -> dict:
         try:
@@ -97,10 +98,10 @@ class Mainutils:
         test_y: DataFrame,
     ) -> Tuple[float, object, str]:
 
-        logger.info("Entered the get_tuned_model method of MainUtils class")
+        logger.info("Entered the get_tuned_model method of Mainutils class")
 
         try:
-            model = self.get_base_model(model_name)
+            model = self.get_base_model(model_name,model_config)
 
             model_best_params = self.get_model_params(model, train_x, train_y)
 
@@ -112,7 +113,7 @@ class Mainutils:
 
             model_score = self.get_model_score(test_y, preds)
 
-            logger.info("Entered the get_tuned_model method of MainUtils class")
+            logger.info("Entered the get_tuned_model method of Mainutils class")
 
             return model_score, model, model.__class__.__name__
 
@@ -142,7 +143,7 @@ class Mainutils:
             return model
         except Exception as e:
             raise CustomException(e,sys) from e
-    @staticmethod
+    
     def get_model_params(self,model:object,x_train:DataFrame,y_train:DataFrame, model_config:dict)->Dict:
         logger.info("Entered the get_model_params method of Mainutils class")
 
@@ -152,8 +153,8 @@ class Mainutils:
             param_grid = model_config['search_param_grid']
 
             model_grid = GridSearchCV(
-                params = param_grid,
-                model = model,
+                param_grid  = param_grid,
+                estimator = model,
                 cv = grid_search_config.get('cv',3),
                 verbose = grid_search_config.get('verbose',2),
                 n_jobs = -1
@@ -161,7 +162,7 @@ class Mainutils:
 
             model_grid.fit(x_train,y_train)
 
-            logging.info("Exited the get_model_params method of MainUtils class")
+            logger.info("Exited the get_model_params method of MainUtils class")
             return model_grid.best_params_
         except Exception as e:
             raise CustomException(e,sys) from e
@@ -216,7 +217,7 @@ class Mainutils:
 
         try:
             with open(file_path,"rb") as file_obj:
-                obj = pickle.load(file_obj)
+                obj = pkl.load(file_obj)
 
                 logger.info("Exited the load_object method of MainUtils class")
 
@@ -233,7 +234,7 @@ class Mainutils:
             shutil.unpack_archive(filename,folder_name)
             logger.info("Exited the unzip_file method of MainUtils class")
         except Exception as e:
-            raise CustomerException(e, sys) from e
+            raise CustomException(e, sys) from e
 
          
 

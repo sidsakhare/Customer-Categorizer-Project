@@ -21,7 +21,7 @@ class TrainingPipelineConfig:
 
 training_pipeline_config: TrainingPipelineConfig = TrainingPipelineConfig()
 
-
+@dataclass
 class DataIngestionConfig:
     data_ingestion_dir: str = os.path.join(training_pipeline_config.artifact_dir,DATA_INGESTION_DIR_NAME)
     feature_store_file_path:str = os.path.join(data_ingestion_dir,DATA_INGESTION_FEATURE_STORE_DIR,FILE_NAME)
@@ -49,7 +49,41 @@ class DataValidationConfig:
     invalid_test_file_path: str = os.path.join(invalid_data_dir,TEST_FILE_NAME)
     drift_report_file_path: str = os.path.join(data_validation_dir,DATA_VALIDATION_DRIFT_REPORT_DIR,DATA_VALIDATION_DRIFT_REPORT_FILE_NAME)
 
-    
+@dataclass
+class PredictionPipelineConfig:
+    data_bucket_name: str = prediction_pipeline.PREDICTION_DATA_BUCKET
+    data_file_path: str = prediction_pipeline.PREDICTION_INPUT_FILE_NAME
+    model_file_name: str = MODEL_FILE_NAME
+    model_bucket_name: str = prediction_pipeline.MODEL_BUCKET_NAME
+    output_file_name: str = prediction_pipeline.PREDICTION_OUTPUT_FILE_NAME
+
+@dataclass
+class SimpleImputerConfig():
+    def __init__(self):
+        self.n_clusters = 3
+        self.affinity = 'euclidean'
+        self.linkage = 'ward'
+
+@dataclass
+class ModelEvaluationConfig:
+    changed_threshold_score: float = MODEL_EVALUATION_CHANGED_THRESHOLD_SCORE
+    bucket_name: str = MODEL_PUSHER_BUCKET_NAME
+    s3_model_key_path: str = MODEL_FILE_NAME
+
+@dataclass
+class ModelPusherConfig:
+    bucket_name: str = MODEL_PUSHER_BUCKET_NAME
+    s3_model_key_path = MODEL_FILE_NAME
+
+
+@dataclass
+class ModelTrainerConfig:
+    model_trainer_dir: str = os.path.join(training_pipeline_config.artifact_dir, MODEL_TRAINER_DIR_NAME)
+    trained_model_file_path: str = os.path.join(model_trainer_dir, MODEL_TRAINER_TRAINED_MODEL_DIR, MODEL_FILE_NAME)
+    expected_accuracy: float = MODEL_TRAINER_EXPECTED_SCORE
+    model_config_file_path: str = MODEL_TRAINER_MODEL_CONFIG_FILE_PATH
+
+
 
 
 class PCAconfig:
@@ -58,5 +92,13 @@ class PCAconfig:
         self.random_state = 42
 
     def get_pca_config(self):
+        return self.__dict__
+
+
+class Prediction_config:
+    def __init__(self):
+        utils = Mainutils()
+        self.prediction_schema = utils.read_yaml_file(PRED_SCHEMA_FILE_PATH)
+    def get_prediction_schema(self):
         return self.__dict__
 

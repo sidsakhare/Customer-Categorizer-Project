@@ -1,3 +1,4 @@
+print("start  work ")
 import json
 import sys
 from typing import Tuple, Union
@@ -7,20 +8,20 @@ from evidently.presets import DataDriftPreset
 from pandas import DataFrame
 
 from src.entity.artifact_entity import DataIngestionArtifact, DataValidationArtifact
-from src.entity.config_entity import DataIngestionConfig
+from src.entity.config_entity import DataValidationConfig
 
 
 from src.exception import CustomException
 from src.logging import logger
-from src.utils.common import Manutils, write_yaml_file
+from src.utils.common import Mainutils, write_yaml_file
 
 
 class DataValidation:
     def __init__(self,
-                data_validation_artifact: DataValidationArtifact,
-                data_validation_config: DataIngestionConfig):
+                    data_ingestion_artifact: DataIngestionArtifact,
+                    data_validation_config: DataValidationConfig):
 
-        self.data_validation_artifact = data_validation_artifact
+        self.data_ingestion_artifact = data_ingestion_artifact
         self.data_validation_config = data_validation_config
         self.utils = Mainutils()
         self._schema_config = self.utils.read_schema_config_file()
@@ -109,3 +110,54 @@ class DataValidation:
             return pd.read_csv(file_path)
         except Exception as e:
             raise CustomException(e,sys) from e
+
+    def initiate_data_validation(self)-> DataValidationArtifact:
+        """
+        Method Name : initiate_data_validation
+        Description : This method initiates the data validation component for the pipeline
+
+        Output : Returns bool value based on validation results
+        On failure : Write an Exception log and then raise exception
+
+        Version: 1.0
+        """
+        logger.info("Initiate Data Validation for the dataset")
+
+        try:
+            train_df, test_df = (DataValidation.read_data(file_path = self.data_ingestion_artifact.trained_file_path),
+                                DataValidation.read_data(file_path = self.data_ingestion_artifact.test_file_path))
+
+            drift =  self.detect_dataset_drift(train_df,test_df)
+
+            schema_train_col_status, schema_test_col_status = self.validate_dataset_schema_columns(train_set = train_df, test_set = test_df)
+
+            logger.info(f"Schema train col status id {schema_train_col_status},schema test col status is {schema_test_col_status}")
+            logger.info("validated dataset schema columns")
+
+            if (
+                schema_train_col_status is True
+                and schema_test_col_status is True
+                and drift  is False
+                ):
+                    logger.info("Dataset chema validation completes")
+
+                    validation_staus = True
+            else:
+                validation_staus = False
+
+            data_validation_artifact = DataValidationArtifact(
+                validation_status= validation_staus,
+                valid_train_file_path= self.data_ingestion_artifact.trained_file_path,
+                valid_test_file_path= self.data_ingestion_artifact.test_file_path,
+                invalid_train_file_path = self.data_validation_config.invalid_train_file_path,
+                invalid_test_file_path = self.data_validation_config.invalid_test_file_path,
+                drift_report_file_path= self.data_validation_config.drift_report_file_path
+            )
+
+
+            return data_validation_artifact
+        except Exception as e:
+            raise CustomException(e,sys) from e
+
+print("works fine")
+
