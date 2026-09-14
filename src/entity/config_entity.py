@@ -66,15 +66,14 @@ class SimpleImputerConfig():
 
 @dataclass
 class ModelEvaluationConfig:
-    changed_threshold_score: float = MODEL_EVALUATION_CHANGED_THRESHOLD_SCORE
-    bucket_name: str = MODEL_PUSHER_BUCKET_NAME
-    s3_model_key_path: str = MODEL_FILE_NAME
+    change_threshold: float = 0.02
+    best_model_dir: str = "saved_models"
+    best_model_file_name: str = "model.pkl"
+    best_preprocessor_file_name: str = "preprocessor.pkl"
 
 @dataclass
 class ModelPusherConfig:
-    bucket_name: str = MODEL_PUSHER_BUCKET_NAME
-    s3_model_key_path = MODEL_FILE_NAME
-
+    model_file_path: str = os.path.join("saved_models", MODEL_FILE_NAME)
 
 @dataclass
 class ModelTrainerConfig:

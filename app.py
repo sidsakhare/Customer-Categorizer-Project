@@ -1,12 +1,11 @@
-from  src.logging import logger
-import os
-import sys
-from src.exception import CustomException
+from fastapi import FastAPI, Request
+from typing import Optional
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import Response
+from uvicorn import run as app_run
+from fastapi.templating import Jinja2Templates
+from fastapi.staticfiles import StaticFiles
 
-try:
-    1/0
 
-except Exception as e:
-    raise CustomException(e,sys) from e
-
-logger.info("This is an info message")
+from src.pipeline.prediction_pipeline import PredictionPipeline
+from src.pipeline.train_pipeline import Trainpipeline

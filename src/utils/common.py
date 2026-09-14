@@ -101,7 +101,7 @@ class Mainutils:
         logger.info("Entered the get_tuned_model method of Mainutils class")
 
         try:
-            model = self.get_base_model(model_name,model_config)
+            model = self.get_base_model(model_name)
 
             model_best_params = self.get_model_params(model, train_x, train_y)
 
@@ -113,7 +113,7 @@ class Mainutils:
 
             model_score = self.get_model_score(test_y, preds)
 
-            logger.info("Entered the get_tuned_model method of Mainutils class")
+            logger.info("Tuned model has been retrived from get_tuned_model method")
 
             return model_score, model, model.__class__.__name__
 
@@ -200,8 +200,8 @@ class Mainutils:
         )
 
         try:
-            best_score = max(model_list)[0]
-            best_model = max(model_list)[1]
+            best_score, best_model = max(model_list, key=lambda x: x[0])
+
 
             logger.info(
                 "Exited the get_best_model_with_name_and_score method of MainUtils class"

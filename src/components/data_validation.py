@@ -1,4 +1,3 @@
-print("start  work ")
 import json
 import sys
 from typing import Tuple, Union
@@ -104,7 +103,6 @@ class DataValidation:
             raise CustomException(e, sys) from e
 
     @staticmethod
-
     def read_data(file_path)-> DataFrame:
         try:
             return pd.read_csv(file_path)
@@ -159,5 +157,4 @@ class DataValidation:
         except Exception as e:
             raise CustomException(e,sys) from e
 
-print("works fine")
 
