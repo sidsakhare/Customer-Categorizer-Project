@@ -8,7 +8,7 @@ from imblearn.combine import SMOTETomek
 from sklearn.preprocessing import StandardScaler, PowerTransformer
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
-from utils import load_numpy_array,save_numpy_array_data, write_yaml_file
+from src.utils.common import load_numpy_array,save_numpy_array_data, write_yaml_file
 from sklearn.impute import SimpleImputer
 
 from src.constants.training_pipeline import TARGET_COLUMN
@@ -63,10 +63,10 @@ class DataTransformation:
 
 
             #Creating new field to store the age of customer
-            dataset["AGE"] = REFERANCE_DATE.year - dataset['Year_Birth']
+            dataset["Age"] = REFERANCE_DATE.year - dataset['Year_Birth']
 
             # recoding the customers education level to numeric form (0: Basic, 1: Graduation, 2: Master, 3: PHD)
-            education_mapping = { "Basic": 0,"Graduation": 1,"Master": 2, "PhD": 3 }
+            education_mapping = { "Basic": 0,'2n Cycle':1,"Graduation": 1,"Master": 2, "PhD": 3 }
             dataset["Education"] = dataset["Education"].map(education_mapping)
 
             # recoding the customers marital status to numeric form (0:Absurd 0:Alone, 0:Divorced ,1:Married ,0:Single ,1:Together ,0:Widow ,0:YOLO)
@@ -108,7 +108,7 @@ class DataTransformation:
             dataset['Offers_Responded_To'] = dataset.iloc[:,[17,18,19,20,21,23]].sum(axis = 1)
 
             # parental status of a customer
-            dataset['parental_status'] = np.where(dataset['Children']>0,1,0)
+            dataset['Parental_Status'] = np.where(dataset['Children']>0,1,0)
 
 
             # dropping columns which are already used to create new features
@@ -117,10 +117,10 @@ class DataTransformation:
             dataset.rename(columns={"Marital_Status": "Marital Status","MntWines": "Wines","MntFruits":"Fruits",
                             "MntMeatProducts":"Meat","MntFishProducts":"Fish","MntSweetProducts":"Sweets",
                             "MntGoldProds":"Gold","NumWebPurchases": "Web","NumCatalogPurchases":"Catalog",
-                            "NumStorePurchases":"Store","NumDealsPurchases":"Discount Purchases"},
+                            "NumStorePurchases":"Store","NumDealsPurchases":"Discount_Purchases"},
                     inplace = True)
 
-            dataset = dataset[["AGE","Education","Marital Status","parental_status","Children","Income","Total_Spending","Days_as_Customer","Recency","Wines","Fruits","Meat","Fish","Sweets","Gold","Web","Catalog","Store","Discount Purchases","Total_Promo","NumWebVisitsMonth"]]
+            dataset = dataset[["Age","Education","Marital Status","Parental_Status","Children","Income","Total_Spending","Days_as_Customer","Recency","Wines","Fruits","Meat","Fish","Sweets","Gold","Web","Catalog","Store","Discount_Purchases","Total_Promo","NumWebVisitsMonth"]]
             if key == 'train_set':
                 train_set_with_new_features = pd.concat([train_set_with_new_features,dataset], axis = 0)
             else:
@@ -139,7 +139,7 @@ class DataTransformation:
 
         logger.info("Starting data transformation process")
         numeric_features = [feature for feature in train_set.columns if train_set[feature].dtype != "O"]
-        outlier_features = ['Wines','Fruits','Meat','Fish','Sweets','Gold','AGE','Total_Spending']
+        outlier_features = ['Wines','Fruits','Meat','Fish','Sweets','Gold','Age','Total_Spending']
         numeric_features = [x for x in numeric_features if x not in outlier_features]
 
         logger.info("Initializing the StandardScaler and SimpleImputer for numeric features")
@@ -211,7 +211,7 @@ class DataTransformation:
                 save_numpy_array_data(file_path = self.data_transformation_config.transformed_train_file_path, array = train_arr)
                 save_numpy_array_data(file_path = self.data_transformation_config.transformed_test_file_path, array = test_arr)
 
-                data_transformation_artifact = DataIngestionArtifact(
+                data_transformation_artifact = DataTransformationArtifact(
                     transformed_object_file_path=transformed_object_file_path,
                     transformed_train_file_path=transformed_train_file_path,
                     transformed_test_file_path=transformed_test_file_path

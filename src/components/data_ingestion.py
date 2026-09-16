@@ -5,7 +5,7 @@ import numpy as np
 from pandas import DataFrame
 from sklearn.model_selection import train_test_split
 
-from src.constants import DATABASE_NAME, COLLECTION_NAME
+from src.constants.database import DATABASE_NAME, COLLECTION_NAME
 from src.entity.config_entity import DataIngestionConfig
 from src.entity.artifact_entity import DataIngestionArtifact
 from src.data_access.customer_data import CustomerData

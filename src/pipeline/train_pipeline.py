@@ -5,15 +5,14 @@ from pandas import DataFrame
 from src.components.data_ingestion import DataIngestion
 from src.components.data_transformation import DataTransformation
 from src.components.data_validation import DataValidation
-from src.model_trainer import ModelTrainer
+from src.components.model_trainer import ModelTrainer
 from src.components.model_evaluation import ModelEvaluation
 
 from src.components.model_pusher import ModelPusher
 
 from src.exception import CustomException
 from src.logging import logger
-from src.entity import artifact_entity(
-                                        DataIngestionArtifact,
+from src.entity.artifact_entity import (DataIngestionArtifact,
                                         DataTransformationArtifact,
                                         DataValidationArtifact,
                                         ModelEvaluationArtifact,
@@ -43,17 +42,17 @@ class TrainPipeline:
             logger.info("Getting data from mongodb")
 
             data_ingestion = DataIngestion(data_ingestion_config= self.data_ingestion_config)
-            data_ingestion-artifact = data_ingestion.initial_data_ingestion()
+            data_ingestion_artifact = data_ingestion.initial_data_ingestion()
             logging.info("Got the train_set and test_set from mongodb")
 
-            logging.info(
+            logger.info(
                 "Exited the start_data_ingestion method of TrainPipeline class"
             )
 
             return data_ingestion_artifact
 
         except Exception as e:
-            raise CustomerException(e, sys) from e
+            raise CustomException(e, sys) from e
 
 
     def start_data_validation(self,data_ingestion_artifact:DataIngestionArtifact)->DataValidationArtifact:
@@ -61,7 +60,7 @@ class TrainPipeline:
 
         try:
             data_validation = DataValidation(
-                data_validation_config= self.data_validation_config
+                data_validation_config= self.data_validation_config,
                 data_ingestion_artifact = data_ingestion_artifact
             )
 
@@ -72,7 +71,7 @@ class TrainPipeline:
             return data_validation_artifact
 
         except Exception as e:
-            raise CustomerException(e, sys) from e
+            raise CustomException(e, sys) from e
 
     def start_data_transformation(self,
                                     data_ingestion_artifact: DataIngestionArtifact,
@@ -138,7 +137,7 @@ class TrainPipeline:
         try:
             model_pusher = ModelPusher(
                 model_trainer_artifact= model_trainer_artifact,
-                model_pusher_config= self.model_evaluation_config
+                model_pusher_config= self.model_pusher
             )
 
             model_pusher_artifact = model_pusher.initiate_model_pusher()
@@ -176,10 +175,10 @@ class TrainPipeline:
             model_pusher_artifact = self.start_model_pusher(
                 model_trainer_artifact= model_trainer_artifact
             )
-            logging.info("Exited the run_pipeline method of TrainPipeline class")
+            logger.info("Exited the run_pipeline method of TrainPipeline class")
 
         except Exception as e:
-            raise CustomerException(e, sys) from e
+            raise CustomException(e, sys) from e
 
 
 

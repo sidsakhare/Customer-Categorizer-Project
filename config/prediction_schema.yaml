@@ -3,7 +3,7 @@ columns:
     Age       :              int
     Education     :          int
     Marital Status  :        int
-    Parental Status :        int
+    Parental_Status :        int
     Children        :        int
     Income            :    float
     Total_Spending    :    float
@@ -18,6 +18,6 @@ columns:
     Web                :     int
     Catalog            :     int
     Store              :     int
-    Discount Purchases  :    int
+    Discount_Purchases  :    int
     Total Promo        :     int
     NumWebVisitsMonth  :     int

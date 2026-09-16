@@ -22,7 +22,7 @@ class LocalModelEstimator:
     def load_model(self) -> CustomerSegmentationModel:
         return pickle.load(self.model_path)
 
-    def save_model(self, from_file: str, remove : bool = Flase) -> None:
+    def save_model(self, from_file: str, remove : bool = False) -> None:
         try:
             os.makedirs(os.path.dirname(self.model_path),exist_ok= True)
             if remove:

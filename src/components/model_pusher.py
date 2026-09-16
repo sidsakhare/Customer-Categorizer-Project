@@ -12,8 +12,8 @@ class ModelPusher:
         model_pusher_config: ModelPusherConfig,
         model_trainer_artifact: ModelTrainerArtifact):
 
-        self.model_trainer_artifact : model_trainer_artifact
-        self.model_pusher_config : model_pusher_artifact
+        self.model_trainer_artifact = model_trainer_artifact
+        self.model_pusher_config = model_pusher_config
         self.estimator = LocalModelEstimator(
             model_path = model_pusher_config.model_file_path
         )
@@ -28,9 +28,9 @@ class ModelPusher:
             model_pusher_artifact = ModelPusherArtifact(
                 saved_model_path= self.model_pusher_config.model_file_path)
 
-            logging.info("Saved model to local folder")
-            logging.info(f"Model pusher artifact: [{model_pusher_artifact}]")
-            logging.info("Exited initiate_model_pusher method of ModelPusher class")
+            logger.info("Saved model to local folder")
+            logger.info(f"Model pusher artifact: [{model_pusher_artifact}]")
+            logger.info("Exited initiate_model_pusher method of ModelPusher class")
             return model_pusher_artifact
         except Exception as e:
-            raise CustomerException(e, sys) from e
+            raise CustomException(e, sys) from e

@@ -29,6 +29,6 @@ columns:
   
 
 drop_columns:
-   ID
-   Z_CostContact 
-   Z_Revenue
+   - ID
+   - Z_CostContact 
+   - Z_Revenue

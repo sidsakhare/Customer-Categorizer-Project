@@ -13,7 +13,7 @@ from dataclasses import dataclass
 from typing import Optional
 from src.entity.config_entity import Prediction_config
 
-from src.utils.main_utils import Mainutils,load_numpy_array_data
+from src.utils.common import Mainutils,load_numpy_array
 from src.ml.metric import calculate_metric
 from src.entity.artifact_entity import ClassificationMetricArtifact
 
@@ -54,13 +54,13 @@ class ModelEvaluation:
 
         try:
             import os
-            if not os.path.exists(self.model_eval_config.best_model_file_name):
+            os.path.join(self.model_eval_config.best_model_dir, self.model_eval_config.best_model_file_name):
                 return None
             trained_model_object = self.utils.load_object(
                 file_path=self.model_eval_config.best_model_file_name
             )
 
-            local_model_estimator = LocalModelEstimator(trained_model_object= trained_model_object)
+            local_model_estimator = LocalModelEstimator(model_path = trained_model_object)
             
             return local_model_estimator
 
@@ -69,7 +69,7 @@ class ModelEvaluation:
 
     def evaluate_model(self)-> EvaluationModelResponse:
         try:
-            test_arr = load_numpy_array_data(
+            test_arr = load_numpy_array(
                 file_path = self.data_transformation_artifact.transformed_test_file_path)
 
             x_test, y_test = pd.DataFrame(test_arr[:,:-1]),pd.DataFrame(test_arr[:,-1])
@@ -121,7 +121,7 @@ class ModelEvaluation:
             return model_evaluation_artifact
 
         except Exception as e:
-            raise CustomerSegmentationModel(e,sys)
+            raise CustomException(e,sys)
 
 
 

@@ -1,7 +1,7 @@
 from src.ml.model.estimator import CustomerSegmentationModel
 from src.logging import logger
 from src.entity.config_entity import DataTransformationConfig, ModelTrainerConfig
-from src.constant.training_pipeline import *
+from src.constants.training_pipeline import *
 from src.entity.config_entity import training_pipeline_config
 from src.entity.config_entity import Prediction_config, PredictionPipelineConfig
 
@@ -30,12 +30,12 @@ class CustomerData:
     @staticmethod
 
     def from_input_dataframe(data):
-        Prediction_config = Prediction_config()
-        prediction_schema = Prediction_config.__dict__
+        Prediction_configs = Prediction_config()
+        prediction_schema = Prediction_configs.__dict__
         column_schema = prediction_schema["prediction_schema"]["columns"]
 
-        CustomerData = CustomerData()
-        input_dataset = CustomerData.get_input_dataset(
+        CustomerDatas = CustomerData()
+        input_dataset = CustomerDatas.get_input_dataset(
             column_schema= column_schema,
             input_data= data
         )
@@ -57,7 +57,7 @@ class PredictionPipeline:
             input_data (list): input data 
 
         Raises:
-            CustomerException
+            Customexception
 
         Returns:
             customerDataframe: pd.DataFrame: a dataframe containing the input values

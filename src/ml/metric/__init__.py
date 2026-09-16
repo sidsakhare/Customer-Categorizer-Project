@@ -17,7 +17,7 @@ def calculate_metric(model,x,y)-> ClassificationMetricArtifact:
 
     return classification_metric
 
-def total_cost(y_true, y_pred)-> metrics:
+def total_cost(y_true, y_pred):
     '''
     This fuction takes y_true n y_predicted and  prints Total Cost due to Missclassification
     '''
