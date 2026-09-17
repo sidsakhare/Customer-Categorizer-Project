@@ -8,6 +8,9 @@ from src.configuration.mongodb_connection import MongoDBClient
 from src.constants.database import DATABASE_NAME
 from src.exception import  CustomException
 
+from dotenv import load_dotenv
+load_dotenv()
+
 class CustomerData:
     """
     This class help to export entire mongo db record as pandas dataframe
@@ -19,7 +22,7 @@ class CustomerData:
             raise CustomException(e,sys) from e
     
     def export_collection_as_dataframe(
-        self, collection_name:str, database_name:Optional[str]
+        self, collection_name:str, database_name:Optional[str] = None
     ) -> DataFrame:
         try:
             '''
@@ -32,7 +35,7 @@ class CustomerData:
                 collection = self.mongo_client.client[database_name][collection_name]
             df = pd.DataFrame(list(collection.find()))
             if "_id" in df.columns.to_list():
-                df.drop(columns = ["_id"])
+                df.drop(columns = ["_id"], inplace= True)
             df.replace({"na":np.nan}, inplace = True)
             return df
         except Exception as e:

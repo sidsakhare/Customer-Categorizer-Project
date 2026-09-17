@@ -8,6 +8,8 @@ from src.constants.database import DATABASE_NAME
 from src.constants.env_variable import MONGODB_URL_KEY
 from src.exception import CustomException
 
+from dotenv import load_dotenv
+load_dotenv()
 ca = certifi.where()
 
 class MongoDBClient():

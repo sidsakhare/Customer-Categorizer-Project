@@ -13,14 +13,14 @@ import pandas as pd
 import numpy as np
 import sys
 from pandas import DataFrame
-import pandas as pd
 
 class CustomerData:
     def __init__(self):
         pass
 
-    def get_input_dataset(self, column_schema:dict, input_data):
-        columns = column_schema.keys()
+    def get_input_dataset(self, column_schema:dict, input_data: list):
+        columns = list(column_schema.keys())
+        input_data = pd.DataFrame([input_data],columns= columns)
 
         for key, value in column_schema.items():
             input_data[key] = input_data[key].astype(value)

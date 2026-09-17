@@ -54,8 +54,8 @@ class ModelEvaluation:
 
         try:
             import os
-            os.path.join(self.model_eval_config.best_model_dir, self.model_eval_config.best_model_file_name):
-                return None
+            os.path.join(self.model_eval_config.best_model_dir, self.model_eval_config.best_model_file_name)
+            return None
             trained_model_object = self.utils.load_object(
                 file_path=self.model_eval_config.best_model_file_name
             )

@@ -8,15 +8,13 @@ from src.constants.training_pipeline import *
 from pymongo import MongoClient
 from pymongo import MongoClient
 from dataclasses import dataclass
-from datetime import datetime
 
-TIMESTAMP: str = datetime.now().strftime("%m_%d_%Y_%H_%M_%S")
 
+@dataclass
 @dataclass
 class TrainingPipelineConfig:
     pipeline_name: str = PIPELINE_NAME
-    artifact_dir: str = os.path.join(PIPELINE_NAME,ARTIFACT_DIR,TIMESTAMP)
-    timestamp:str = TIMESTAMP
+    artifact_dir: str = os.path.join(PIPELINE_NAME, ARTIFACT_DIR)
 
 
 training_pipeline_config: TrainingPipelineConfig = TrainingPipelineConfig()
