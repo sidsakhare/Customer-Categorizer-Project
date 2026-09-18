@@ -2,8 +2,8 @@ import json
 import sys
 from typing import Tuple, Union
 import pandas as pd
-from evidently import Report
-from evidently.presets import DataDriftPreset
+from evidently.legacy.report import Report
+from evidently.legacy.metric_preset import DataDriftPreset
 from pandas import DataFrame
 
 from src.entity.artifact_entity import DataIngestionArtifact, DataValidationArtifact

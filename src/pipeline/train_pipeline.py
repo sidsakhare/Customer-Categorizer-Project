@@ -43,7 +43,7 @@ class TrainPipeline:
 
             data_ingestion = DataIngestion(data_ingestion_config= self.data_ingestion_config)
             data_ingestion_artifact = data_ingestion.initial_data_ingestion()
-            logging.info("Got the train_set and test_set from mongodb")
+            logger.info("Got the train_set and test_set from mongodb")
 
             logger.info(
                 "Exited the start_data_ingestion method of TrainPipeline class"

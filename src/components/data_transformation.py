@@ -19,17 +19,17 @@ from src.components.data_ingestion import DataIngestion
 from src.logging import logger
 from src.entity.config_entity import SimpleImputerConfig
 from src.utils.common import Mainutils
-from src.components import data_clustering
+from src.components.data_clustering import CreatClusters
 
 
 class DataTransformation:
 
     def __init__(self,
-    data_ingetion_artifact:DataIngestionArtifact,
+    data_ingestion_artifact:DataIngestionArtifact,
     data_validation_artifact: DataValidationArtifact,
     data_transformation_config: DataTransformationConfig):
 
-            self.data_ingestion_artifact = data_ingetion_artifact
+            self.data_ingestion_artifact = data_ingestion_artifact
             self.data_validation_artifact = data_validation_artifact
             self.data_transformation_config = data_transformation_config
             self.imputer_config = SimpleImputerConfig()
@@ -212,9 +212,9 @@ class DataTransformation:
                 save_numpy_array_data(file_path = self.data_transformation_config.transformed_test_file_path, array = test_arr)
 
                 data_transformation_artifact = DataTransformationArtifact(
-                    transformed_object_file_path=transformed_object_file_path,
-                    transformed_train_file_path=transformed_train_file_path,
-                    transformed_test_file_path=transformed_test_file_path
+                    transformed_object_file_path=self.data_transformation_config.transformed_object_file_path,
+                    transformed_train_file_path=self.data_transformation_config.transformed_train_file_path,
+                    transformed_test_file_path=self.data_transformation_config.transformed_test_file_path,
                 )
 
 
