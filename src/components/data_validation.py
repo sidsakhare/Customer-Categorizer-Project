@@ -1,6 +1,6 @@
 import json
 import sys
-from typing import Tuple, Union
+from typing import Tuple
 import pandas as pd
 from evidently.legacy.report import Report
 from evidently.legacy.metric_preset import DataDriftPreset
@@ -40,13 +40,12 @@ class DataValidation:
             schema_columns = self._schema_config["columns"]
             dataframe_columns = list(dataframe.columns)
 
-            if set(schema_columns) == set(dataframe_columns):
-                return True
-                logger.info("Schema validation successful. Columns in the dataframe match the schema.")
+            status =  set(schema_columns) == set(dataframe_columns)
+            if status:
+                logger.info("Schema validation successful")
             else:
-                return False
-                logger.error("Schema validation failed. Columns in the dataframe do not match the schema.")
-
+                logger.error(f"Schema mismatch. Differences: {set(schema_columns) ^ set(dataframe_columns)}")
+            return status
         except Exception as e:
             raise CustomException(e, sys) from e
 
@@ -85,8 +84,8 @@ class DataValidation:
         '''
         logger.info("Entered the detect_dataset_drift method of DataValidation class")
         try:
-            report = Report(presets=[DataDriftPreset()])
-            report.calculate(referance_df, current_df)
+            report = Report(metrics=[DataDriftPreset()])
+            report.run(reference_data = referance_df, current_data = current_df)
             json_report = json.loads(report.json())
 
             write_yaml_file(file_path = self.data_validation_config.drift_report_file_path, content = json_report)
@@ -132,19 +131,13 @@ class DataValidation:
             logger.info(f"Schema train col status id {schema_train_col_status},schema test col status is {schema_test_col_status}")
             logger.info("validated dataset schema columns")
 
-            if (
-                schema_train_col_status is True
-                and schema_test_col_status is True
-                and drift  is False
-                ):
-                    logger.info("Dataset chema validation completes")
-
-                    validation_staus = True
+            if schema_train_col_status and schema_test_col_status and not drift:
+                logger.info("Dataset schema validation completed")
+                validation_status = True
             else:
-                validation_staus = False
-
+                validation_status = False
             data_validation_artifact = DataValidationArtifact(
-                validation_status= validation_staus,
+                validation_status= validation_status,
                 valid_train_file_path= self.data_ingestion_artifact.trained_file_path,
                 valid_test_file_path= self.data_ingestion_artifact.test_file_path,
                 invalid_train_file_path = self.data_validation_config.invalid_train_file_path,

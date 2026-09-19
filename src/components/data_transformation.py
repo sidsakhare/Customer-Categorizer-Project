@@ -4,12 +4,12 @@ import numpy as np
 import os
 import pandas as pd
 from pandas import DataFrame
-from imblearn.combine import SMOTETomek
 from sklearn.preprocessing import StandardScaler, PowerTransformer
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
-from src.utils.common import load_numpy_array,save_numpy_array_data, write_yaml_file
+from src.utils.common import save_numpy_array_data
 from sklearn.impute import SimpleImputer
+from typing import Tuple
 
 from src.constants.training_pipeline import TARGET_COLUMN
 from src.entity.config_entity import DataTransformationConfig
@@ -22,6 +22,14 @@ from src.utils.common import Mainutils
 from src.components.data_clustering import CreatClusters
 
 
+REFERENCE_DATE = pd.Timestamp("2026-01-01")
+EDUCATION_MAP = {"Basic": 0, "2n Cycle": 1, "Graduation": 1, "Master": 2, "PhD": 3}
+FINAL_COLUMNS = ["Age", "Education", "Marital Status", "Parental_Status", "Children", "Income",
+                        "Total_Spending", "Days_as_Customer", "Recency", "Wines", "Fruits", "Meat", "Fish",
+                        "Sweets", "Gold", "Web", "Catalog", "Store", "Discount_Purchases", "Total_Promo",
+                        "NumWebVisitsMonth"]
+MAX_AGE = 96          # Year_Birth >= 1930 with a 2026 reference date
+MAX_INCOME = 200_000  # drops the 666,666 outlier; the test-set max is about 160,000
 class DataTransformation:
 
     def __init__(self,
@@ -36,6 +44,7 @@ class DataTransformation:
             self.utils = Mainutils()
 
 
+
     @staticmethod
     def read_data(file_path:str) ->DataFrame:
         try:
@@ -43,91 +52,38 @@ class DataTransformation:
         except Exception as e:
             raise CustomException(e,sys) from e
 
-    def get_new_features(self, train_set: DataFrame, test_set: DataFrame) -> DataFrame:
-        '''
-        method : get_new_features
-        description : This method is used to create new features for the training and testing sets
-        version : 1.0
-        '''
+    @staticmethod
+    def engineer_features(df: DataFrame, remove_outliers: bool = True) -> DataFrame:
+        df = df.copy()
+        df["Dt_Customer"] = pd.to_datetime(df["Dt_Customer"], format="%d-%m-%Y")
+        df["Age"] = REFERENCE_DATE.year - df["Year_Birth"]
+        df["Education"] = df["Education"].map(EDUCATION_MAP)
+        df["Marital Status"] = df["Marital_Status"].isin(["Married", "Together"]).astype(int)
+        df["Children"] = df["Kidhome"] + df["Teenhome"]
+        df["Parental_Status"] = (df["Children"] > 0).astype(int)
+        df["Total_Spending"] = df[["MntWines", "MntFruits", "MntMeatProducts",
+                                "MntFishProducts", "MntSweetProducts", "MntGoldProds"]].sum(axis=1)
+        df["Total_Promo"] = df[[f"AcceptedCmp{i}" for i in range(1, 6)]].sum(axis=1)
+        df["Days_as_Customer"] = (REFERENCE_DATE - df["Dt_Customer"]).dt.days
 
-        train_set_with_new_features = pd.DataFrame()
-        test_set_with_new_features = pd.DataFrame()
-        datasets = {"train_set": train_set, "test_set": test_set}
+        if remove_outliers:
+            rows_before = len(df)
+            keep = (df["Age"] <= MAX_AGE) & (df["Income"].isna() | (df["Income"] <= MAX_INCOME))
+            df = df[keep]
+            logger.info(f"Removed {rows_before - len(df)} outlier rows (Age > {MAX_AGE} or Income > {MAX_INCOME})")
 
-        for key in datasets:
-            dataset = datasets[key]
+        df = df.rename(columns={"MntWines": "Wines", "MntFruits": "Fruits", "MntMeatProducts": "Meat",
+                                "MntFishProducts": "Fish", "MntSweetProducts": "Sweets",
+                                "MntGoldProds": "Gold", "NumWebPurchases": "Web",
+                                "NumCatalogPurchases": "Catalog", "NumStorePurchases": "Store",
+                                "NumDealsPurchases": "Discount_Purchases"})
+        return df[FINAL_COLUMNS].reset_index(drop=True)
 
-            # Converting Birth_Year and DT_Customer features to datetime 
-            REFERANCE_DATE = pd.Timestamp('2026-01-01')
-            dataset["Dt_Customer"]  = pd.to_datetime(dataset["Dt_Customer"],format='mixed')
-
-
-            #Creating new field to store the age of customer
-            dataset["Age"] = REFERANCE_DATE.year - dataset['Year_Birth']
-
-            # recoding the customers education level to numeric form (0: Basic, 1: Graduation, 2: Master, 3: PHD)
-            education_mapping = { "Basic": 0,'2n Cycle':1,"Graduation": 1,"Master": 2, "PhD": 3 }
-            dataset["Education"] = dataset["Education"].map(education_mapping)
-
-            # recoding the customers marital status to numeric form (0:Absurd 0:Alone, 0:Divorced ,1:Married ,0:Single ,1:Together ,0:Widow ,0:YOLO)
-            dataset['Marital_Status'].replace({"Married":1, "Together":1, "Absurd":0, "Widow":0, "YOLO":0, "Divorced":0, "Single":0,"Alone":0},inplace=True) 
-
-            # creating a new field to store the number of children in the household
-            dataset["Children"] = dataset["Kidhome"]+dataset["Teenhome"]
-
-            # creating Family_Size
-            dataset["Family_size"] = dataset["Children"] + dataset["Marital_Status"]+1
-
-            #  creating a new field to store the total spending of the customer
-            spending_columns = [
-                                "MntWines",
-                                "MntFruits",
-                                "MntMeatProducts",
-                                "MntFishProducts",
-                                "MntSweetProducts",
-                                "MntGoldProds"
-                                                    ]
-
-            dataset["Total_Spending"] = dataset[spending_columns].sum(axis=1)
-
-            #  creating a new field how many promo done for customer
-            promo_columns = [
-                                "AcceptedCmp1",
-                                "AcceptedCmp2",
-                                "AcceptedCmp3",
-                                "AcceptedCmp4",
-                                "AcceptedCmp5"
-                            ]
-
-            dataset["Total_Promo"] = dataset[promo_columns].sum(axis=1)
-
-            # The following code works out how long customer has been with the company 
-            dataset["Days_as_Customer"] = (pd.Timestamp.now() - dataset["Dt_Customer"]).dt.days
-
-            # Total number of promotions customer responced to 
-            dataset['Offers_Responded_To'] = dataset.iloc[:,[17,18,19,20,21,23]].sum(axis = 1)
-
-            # parental status of a customer
-            dataset['Parental_Status'] = np.where(dataset['Children']>0,1,0)
-
-
-            # dropping columns which are already used to create new features
-            columns_to_drop = ['Year_Birth',"Kidhome","Teenhome"]
-            dataset.drop(columns = columns_to_drop, axis = 1, inplace=True)
-            dataset.rename(columns={"Marital_Status": "Marital Status","MntWines": "Wines","MntFruits":"Fruits",
-                            "MntMeatProducts":"Meat","MntFishProducts":"Fish","MntSweetProducts":"Sweets",
-                            "MntGoldProds":"Gold","NumWebPurchases": "Web","NumCatalogPurchases":"Catalog",
-                            "NumStorePurchases":"Store","NumDealsPurchases":"Discount_Purchases"},
-                    inplace = True)
-
-            dataset = dataset[["Age","Education","Marital Status","Parental_Status","Children","Income","Total_Spending","Days_as_Customer","Recency","Wines","Fruits","Meat","Fish","Sweets","Gold","Web","Catalog","Store","Discount_Purchases","Total_Promo","NumWebVisitsMonth"]]
-            if key == 'train_set':
-                train_set_with_new_features = pd.concat([train_set_with_new_features,dataset], axis = 0)
-            else:
-                test_set_with_new_features = pd.concat([test_set_with_new_features,dataset], axis = 0)
-
-        logger.info("New features has been created successfully for both training and testing sets")
-        return train_set_with_new_features, test_set_with_new_features
+    def get_new_features(self, train_set: DataFrame, test_set: DataFrame) -> Tuple[DataFrame, DataFrame]:
+        train_out = self.engineer_features(train_set)
+        test_out = self.engineer_features(test_set)
+        logger.info("New features created for train and test sets")
+        return train_out, test_out
 
 
     def transform_data(self,train_set: DataFrame, test_set: DataFrame)-> DataFrame:
@@ -145,11 +101,11 @@ class DataTransformation:
         logger.info("Initializing the StandardScaler and SimpleImputer for numeric features")
 
         numeric_pipeline = Pipeline(steps =[(
-            "Imputer", SimpleImputer(strategy='constant',fill_value=0))
+            "Imputer", SimpleImputer(strategy='median',fill_value=0))
         ,(
         "Standardscaler", StandardScaler())])
 
-        outlier_features_pipeline = Pipeline(steps=[("imputer",SimpleImputer(strategy="constant",fill_value=0)),
+        outlier_features_pipeline = Pipeline(steps=[("imputer",SimpleImputer(strategy="median",fill_value=0)),
         ("Transformer",PowerTransformer(standardize=True))])
 
         preprocessor = ColumnTransformer(
@@ -193,20 +149,14 @@ class DataTransformation:
 
                 preprocessed_train_set, preprocessed_test_set = self.transform_data(train_set = train_set, test_set = test_set)
 
-
                 cluster_creater = CreatClusters()
 
-                labelled_train_set = cluster_creater.initialize_clustering(preprocessed_data = preprocessed_train_set)
-                labelled_test_set = cluster_creater.initialize_clustering(preprocessed_data = preprocessed_test_set)
+                y_train = cluster_creater.fit_clusters(preprocessed_train_set)
+                y_test = cluster_creater.predict_clusters(preprocessed_test_set)
 
-                x_train = labelled_train_set.drop(columns = [TARGET_COLUMN], axis = 1)
-                y_train = labelled_train_set[TARGET_COLUMN]
-
-                x_test = labelled_test_set.drop(columns = [TARGET_COLUMN], axis = 1)
-                y_test = labelled_test_set[TARGET_COLUMN]
-
-                test_arr = np.c_[x_test,y_test]
-                train_arr = np.c_[x_train,y_train]
+                # Features stay as the scaled data; PCA is only used to find the clusters
+                train_arr = np.c_[preprocessed_train_set, y_train]
+                test_arr = np.c_[preprocessed_test_set, y_test]
 
                 save_numpy_array_data(file_path = self.data_transformation_config.transformed_train_file_path, array = train_arr)
                 save_numpy_array_data(file_path = self.data_transformation_config.transformed_test_file_path, array = test_arr)

@@ -1,1 +1,2 @@
-from .database import DATABASE_NAME, COLLECTION_NAME
+from dotenv import load_dotenv
+load_dotenv()
