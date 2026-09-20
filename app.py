@@ -135,10 +135,10 @@ async def PredictRouteClient(request: Request):
         prediction_cluster = prediction_pipeline.run_pipeline(input_data= input_data)
 
         return templates.TemplateResponse(
-            'customer.html',
-            {'request':request, 'context':int(prediction_cluster[0])}
+            request=request,
+            name="customer.html",
+            context={"context": prediction_cluster},
         )
-
     except Exception as e:
         return {"status": False, "error": f"{e}"}
 if __name__ == '__main__':

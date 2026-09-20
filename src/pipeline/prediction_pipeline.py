@@ -89,17 +89,8 @@ class PredictionPipeline:
             training_config = ModelTrainerConfig()
 
 
-            preprocessing_object = self.utils.load_object(
-                file_path=transformation_config .transformed_object_file_path
-            )
-            trained_model_object = self.utils.load_object(
-                file_path=training_config.trained_model_file_path
-            )
-
-            model = CustomerSegmentationModel(
-                preprocessing_object=preprocessing_object,
-                trained_model_object=trained_model_object
-            )
+            model = self.utils.load_object(
+            file_path=training_config.trained_model_file_path)
             return model
 
         except Exception as e:
@@ -118,6 +109,6 @@ class PredictionPipeline:
             input_dataframe = self.prepare_input_data(input_data)
             model = self.get_trained_model()
             prediction = model.predict(input_dataframe)
-            return prediction
+            return int(np.asarray(prediction).ravel()[0])
         except Exception as e:
             raise CustomException(e,sys)

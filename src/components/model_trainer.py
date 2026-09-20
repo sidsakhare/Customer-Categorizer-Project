@@ -5,6 +5,7 @@ from pandas import DataFrame
 import numpy as np
 from src.entity.config_entity import ModelTrainerConfig
 from src.entity.artifact_entity import DataTransformationArtifact, ModelTrainerArtifact,ClassificationMetricArtifact
+from src.ml.model.estimator import CustomerSegmentationModel
 
 from src.exception import CustomException
 from src.logging import logger
@@ -12,28 +13,29 @@ from src.utils.common import Mainutils, load_numpy_array
 from neuro_mf import ModelFactory
 from sklearn.metrics import f1_score, recall_score, precision_score
 
-class CustomerSegmentationModel:
-    def __init__(self,preprocessing_object: object,trained_model_object:object):
-        self.preprocessing_object = preprocessing_object
-        self.trained_model_object = trained_model_object
 
-    def predict(self,dataframe: DataFrame)-> DataFrame:
-        logger.info("Entered predict method of CustoMerSegmentation class")
-        try:
-            logger.info("Using the trained model to get prediction")
-            transformed_feature = self.preprocessing_object.transform(dataframe)
+# class CustomerSegmentationModel:
+#     def __init__(self,preprocessing_object: object,trained_model_object:object):
+#         self.preprocessing_object = preprocessing_object
+#         self.trained_model_object = trained_model_object
 
-            logger.info("used trained model to get prediction")
-            return self.trained_model_object.predict(transformed_feature)
+#     def predict(self,dataframe: DataFrame)-> DataFrame:
+#         logger.info("Entered predict method of CustoMerSegmentation class")
+#         try:
+#             logger.info("Using the trained model to get prediction")
+#             transformed_feature = self.preprocessing_object.transform(dataframe)
 
-        except Exception as e:
-            raise CustomException(e,sys) from e
+#             logger.info("used trained model to get prediction")
+#             return self.trained_model_object.predict(transformed_feature)
 
-    def __repr__(self):
-        return f"{type(self.trained_model_object).__name__}()"
+#         except Exception as e:
+#             raise CustomException(e,sys) from e
 
-    def __str__(self):
-        return f"{type(self.trained_model_object).__name__}()"
+#     def __repr__(self):
+#         return f"{type(self.trained_model_object).__name__}()"
+
+#     def __str__(self):
+#         return f"{type(self.trained_model_object).__name__}()"
 
 class ModelTrainer:
     def __init__(self,data_transformation_artifact: DataTransformationArtifact,model_trainer_config : ModelTrainerConfig):
