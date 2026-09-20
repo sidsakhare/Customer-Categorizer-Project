@@ -19,5 +19,5 @@ columns:
     Catalog            :     int
     Store              :     int
     Discount_Purchases  :    int
-    Total Promo        :     int
+    Total_Promo        :     int
     NumWebVisitsMonth  :     int

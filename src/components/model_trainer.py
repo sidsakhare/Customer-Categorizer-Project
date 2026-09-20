@@ -10,6 +10,7 @@ from src.exception import CustomException
 from src.logging import logger
 from src.utils.common import Mainutils, load_numpy_array
 from neuro_mf import ModelFactory
+from sklearn.metrics import f1_score, recall_score, precision_score
 
 class CustomerSegmentationModel:
     def __init__(self,preprocessing_object: object,trained_model_object:object):
@@ -64,13 +65,20 @@ class ModelTrainer:
             trained_model_path = os.path.dirname(self.model_trainer_config.trained_model_file_path)
             os.makedirs(trained_model_path,exist_ok= True)
 
+            y_pred = best_model_detail.best_model.predict(x_test)
+            y_pred = np.asarray(y_pred).ravel().astype(int)
+
             self.utils.save_object(
                 file_path= self.model_trainer_config.trained_model_file_path,
                 obj= customer_segmentation_model
             )
 
             logger.info(f"Customer segmentation model have saved succsessfully at {trained_model_path}")
-            metric_artifact = ClassificationMetricArtifact(f1_score= 0.8, precision_score= 0.8, recall_score= 0.8)
+            metric_artifact = ClassificationMetricArtifact(
+                f1_score= f1_score(y_test, y_pred, average="weighted"),
+                precision_score= precision_score(y_test, y_pred, average="weighted"),
+                recall_score= recall_score(y_test, y_pred, average="weighted")
+            )
             model_trainer_artifact = ModelTrainerArtifact(
                 trained_model_file_path= self.model_trainer_config.trained_model_file_path,
                 metric_artifact= metric_artifact

@@ -110,11 +110,7 @@ class DataIngestion:
         except Exception as e:
             raise CustomException(e,sys) from e
 
-if __name__ == "__main__":
-    ingestion = DataIngestion()          # no config passed, since it builds its own
-    data_ingestion_artifact = ingestion.initial_data_ingestion()
-    print(f"Train saved at: {data_ingestion_artifact.trained_file_path}")
-    print(f"Test saved at: {data_ingestion_artifact.test_file_path}")
+
 
 
 

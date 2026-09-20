@@ -1,20 +1,26 @@
 grid_search:
   class: GridSearchCV
-  module: catboost
+  module: sklearn.model_selection
   params:
     cv: 3
-    verbose: 3
+    verbose: 1
+
 model_selection:
   module_0:
     class: CatBoostClassifier
     module: catboost
     params:
       iterations: 500
-      learning_rate: 6
-  search_param_grid:
-    learning_rate:
-     - 4
-     - 6
-    iterations:
-     - 300
-     - 250
+      learning_rate: 0.1
+      verbose: 0
+    search_param_grid:
+      learning_rate:
+        - 0.03
+        - 0.1
+        - 0.3
+      iterations:
+        - 250
+        - 300
+      depth:
+        - 4
+        - 6
